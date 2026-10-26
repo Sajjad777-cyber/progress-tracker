@@ -1,0 +1,3 @@
+import { Sparkles } from "lucide-react";
+import { PreviewCard, PrototypePage } from "@/components/prototype-page";
+export default function AIUsagePage() { const configured = Boolean(process.env.GEMINI_API_KEY); return <PrototypePage eyebrow="Settings" title="AI usage" description="Review optional AI usage, limits, and provider privacy information."><div className="mt-8 max-w-md"><PreviewCard icon={Sparkles} title={configured ? "AI provider configured" : "AI provider unavailable"} detail={configured ? "Tracker proposals are available within the configured daily limit of 20 requests." : "Add GEMINI_API_KEY on the server to enable proposals. Manual tracking remains available."} /></div></PrototypePage>; }
