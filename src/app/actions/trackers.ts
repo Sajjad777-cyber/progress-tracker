@@ -26,6 +26,17 @@ export async function getOrCreateWorkspace(userId: string) {
 export async function createTracker(_state: TrackerActionState, formData: FormData): Promise<TrackerActionState> {
   const parsed = trackerInputSchema.safeParse({ name: formData.get("name"), description: formData.get("description") || undefined, category: formData.get("category") || undefined, mode: formData.get("mode"), templateId: formData.get("templateId") || undefined, startDate: formData.get("startDate") || undefined, targetDate: formData.get("targetDate") || undefined });
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
+  let customFields = trackerFieldsSchema.parse([]);
+  const rawFieldConfig = formData.get("fieldConfig");
+  if (typeof rawFieldConfig === "string" && rawFieldConfig.trim()) {
+    try {
+      const fieldResult = trackerFieldsSchema.safeParse(JSON.parse(rawFieldConfig));
+      if (!fieldResult.success) return { error: "Please check the custom field configuration." };
+      customFields = fieldResult.data;
+    } catch {
+      return { error: "The custom field configuration is invalid." };
+    }
+  }
   const user = await getCurrentUser();
   if (!user) return { error: "Sign in before creating a tracker." };
 
@@ -42,6 +53,13 @@ export async function createTracker(_state: TrackerActionState, formData: FormDa
       if (fieldError || taskError) {
         await supabase.from("trackers").delete().eq("id", data.id);
         return { error: "The tracker could not be created from that template." };
+      }
+    }
+    if (customFields.length > 0) {
+      const { error: fieldError } = await supabase.from("tracker_fields").insert(customFields.map((field) => ({ tracker_id: data.id, name: field.name, field_key: field.fieldKey, field_type: field.fieldType, description: field.description ?? null, is_required: field.isRequired, position: field.position, validation: { ...field.validation, defaultValue: field.defaultValue ?? null, units: field.units ?? null, options: field.options }, display: { ...field.display, format: field.displayFormat ?? null, visibility: field.visibility } })));
+      if (fieldError) {
+        await supabase.from("trackers").delete().eq("id", data.id);
+        return { error: "The tracker could not save its custom fields." };
       }
     }
     trackerId = data.id;

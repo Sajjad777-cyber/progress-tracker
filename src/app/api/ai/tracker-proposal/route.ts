@@ -17,8 +17,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ proposal: result.proposal, model: result.model });
   } catch (error) {
     const code = error instanceof Error ? error.message : "AI_UNAVAILABLE";
-    const messages: Record<string, string> = { AI_NOT_CONFIGURED: "AI is not configured. Manual tracker creation is still available.", AI_QUOTA_EXHAUSTED: "Your daily AI limit has been reached. Try again tomorrow or build the tracker manually.", AI_TIMEOUT: "The AI request took too long. Please try again.", AI_INVALID_JSON: "The AI returned an invalid proposal. Please try again.", AI_USAGE_UNAVAILABLE: "AI usage could not be checked. Please try again later." };
-    const status = code === "AI_QUOTA_EXHAUSTED" ? 429 : code === "AI_NOT_CONFIGURED" ? 503 : 500;
-    return NextResponse.json({ error: messages[code] ?? "The AI assistant is temporarily unavailable." }, { status });
+    const messages: Record<string, string> = { AI_NOT_CONFIGURED: "AI is not configured. Manual tracker creation is still available.", AI_QUOTA_EXHAUSTED: "Your daily AI limit has been reached. Try again tomorrow or build the tracker manually.", AI_TIMEOUT: "The AI request took too long. Please try again.", AI_INVALID_JSON: "Gemini returned text that was not valid JSON. Try a shorter or clearer request.", AI_EMPTY_RESPONSE: "Gemini returned an empty response. Check the selected model and try again.", AI_USAGE_UNAVAILABLE: "AI usage could not be checked. Verify the Supabase connection and try again." };
+    const isTemporary = /503|UNAVAILABLE|high demand|temporarily/i.test(code);
+    const providerMessage = isTemporary ? "Gemini is temporarily busy. Please try again in a moment." : code.replace(process.env.GEMINI_API_KEY ?? "", "[redacted]").trim().slice(0, 500);
+    const status = code === "AI_QUOTA_EXHAUSTED" || /429|quota|rate.?limit/i.test(code) ? 429 : code === "AI_NOT_CONFIGURED" || isTemporary ? 503 : 500;
+    return NextResponse.json({ error: messages[code] ?? (providerMessage || "The AI assistant returned an unknown error.") }, { status });
   }
 }

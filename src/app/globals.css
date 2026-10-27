@@ -2,17 +2,54 @@
 
 :root {
   --background: #f7f8f5;
-  --foreground: #18211b;
+  --foreground: #171525;
   --surface: #ffffff;
-  --surface-muted: #eef1ed;
-  --line: #dce3dc;
-  --muted: #657169;
-  --primary: #176b63;
-  --primary-deep: #10534d;
-  --accent: #d97745;
-  --success: #23805a;
-  --warning: #b7791f;
-  --danger: #c2413b;
+  --surface-raised: #ffffff;
+  --surface-muted: #f0eef5;
+  --line: #e2dfe9;
+  --muted: #6d6879;
+  --primary: #7458d8;
+  --primary-deep: #5940b4;
+  --primary-soft: #eeeafd;
+  --info: #3e8edb;
+  --info-soft: #e7f2fc;
+  --success: #2e9b73;
+  --success-soft: #e3f5ed;
+  --warning: #c8872d;
+  --warning-soft: #fff3df;
+  --danger: #d04e5b;
+  --ai-surface: #211b42;
+  --ambient: rgba(116, 88, 216, .12);
+  --shadow-sm: 0 2px 8px rgba(31, 24, 53, .05);
+  --shadow-md: 0 14px 40px rgba(31, 24, 53, .09);
+  --shadow-lg: 0 28px 80px rgba(31, 24, 53, .13);
+  --radius-card: 16px;
+  --radius-control: 10px;
+}
+
+[data-theme="dark"] {
+  --background: #0c0b18;
+  --foreground: #f5f2ff;
+  --surface: #151327;
+  --surface-raised: #1c1933;
+  --surface-muted: #211e3a;
+  --line: #332e50;
+  --muted: #aaa5bd;
+  --primary: #a38af5;
+  --primary-deep: #c0b0ff;
+  --primary-soft: #2b2350;
+  --info: #68b7f5;
+  --info-soft: #193450;
+  --success: #56d19c;
+  --success-soft: #173d35;
+  --warning: #e5ae55;
+  --warning-soft: #48351b;
+  --danger: #ff7b88;
+  --ai-surface: #17132d;
+  --ambient: rgba(116, 88, 216, .2);
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, .18);
+  --shadow-md: 0 18px 48px rgba(0, 0, 0, .28);
+  --shadow-lg: 0 32px 90px rgba(0, 0, 0, .38);
 }
 
 @theme inline {
@@ -27,6 +64,105 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-dm-sans), sans-serif;
+  transition: background-color .25s ease, color .25s ease;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(circle at 8% 0%, var(--ambient), transparent 34%), radial-gradient(circle at 92% 18%, rgba(62, 142, 219, .08), transparent 28%);
+}
+
+button, a, input, textarea, select {
+  outline: none;
+}
+
+:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.surface-raised {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+}
+
+.glass-surface {
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-md);
+}
+
+.interactive-lift {
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.interactive-lift:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+  box-shadow: var(--shadow-md);
+}
+
+.metric-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.05em;
+}
+
+.eyebrow {
+  color: var(--primary);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.section-title {
+  margin-top: .75rem;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  font-weight: 700;
+  letter-spacing: -.06em;
+  line-height: 1.02;
+}
+
+.section-copy {
+  margin-top: 1.25rem;
+  max-width: 38rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.landing-grid {
+  background-image: linear-gradient(color-mix(in srgb, var(--primary) 12%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--primary) 12%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 72%);
+}
+
+.hero-canvas { transform-style: preserve-3d; }
+.float-slow { animation: float-slow 7s ease-in-out infinite; }
+.float-slower { animation: float-slow 9s ease-in-out 1s infinite; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
 
 * {
